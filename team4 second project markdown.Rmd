@@ -1,0 +1,816 @@
+---
+title: '"4조 EDA 총합 보고서"'
+author: '"배규원","장진솔","김우종","남경훈"'
+date: '2020 6 3 '
+output: word_document
+---
+
+# 목차
+## 1. 목적-진솔
+## 2. 시간-규원
+## 3. 빈도-우종
+## 4. 여가활동 유형별 순위-나
+## 5. 만족도-나
+## 6. 긍정적영향-규원
+## 7. 행복수준-규원
+
+
+
+# 1. 목적
+
+# 1.  주제선정 및 필요성
+
+우리나라는 출산율 감소되고 있고 평균수명이 연장되어 2018년에는 65세 이상 노인 비율이 14.3%, 2026년에는 20.8%의 급격한 증가가 예상되고 있다. 
+노인인구의 급속한 증가와 더불어 도시화, 노인부양의식의 약화 등으로 노인들은 점차 가족과 사회로부터 소외되고 있으며 사회경제적 지위와 역할을 상실해가고 있고, 이로 인해 노인들이 빈곤, 질병, 고독, 역할상실 등을 경험하고 있으며, 이러한 노인문제가 점점 심각한 사회문제가 되고 있다.
+이러한 문제들을 해결하기 위해서 노인들은 여가활동에 참여하고 있다. 여가활동을 통해 신체적 ,정신적 건강을 증진하고, 사회적 접촉 기회를 갖게 되며, 삶에 대한 사기와 만족감을 높일 수 있기 때문이다. 이러한 이유로 여가활동에 참여하는 노인들이 급증하고 있는 추세이며, 이러한 추세는 노인들이 여가활동에 대해 의존도가 커지고 있다는 의미이다. 의존도가 커진다는 의미는 그만큼 노인의 삶에 중요한 역할을 해준다는 것이다. 노인이 참여하는 여가활동에 만족하지 못한다면 그 노인에게 부정적 영향이 갈 것이고, 만족한다면 긍정적인 영향이 갈 것이다. 
+
+덧붙여 분석을 하기 전, 논문을 찾아본 결과 노인의 여가활동 만족도는 생활만족도에 영향을 미친다는 논문이 있었다. (file:///C:/Users/CPB06GameN/Desktop/노인/노인의%20여가활동%20유형이%20생활만족도에%20미치는%20영향.pdf) 여기서 생활 만족도란, 생활에 어느정도 만족하는지 어느 한 측면으로 바라보는 것을 말한다.
+
+그렇다면 노인의 유형별 여가활동 만족도는 과연 행복수준에 어떠한 영향을 미치는가?
+여가활동 중에는 노인들이 주로 활동하는 여가활동이 있을 것이고, 주로 하지 않는 여가활동이 있을 것이며 이에 대해 각 만족도 또한 다를 것이다. 즉, 어떤 유형의 여가활동에 많이 참여한다고 해서 그 여가활동의 만족도가 높다고 볼 수는 없다는 것이다. 이 주제를 진행하기 위해서는 노인연령의 여가활동 데이터들을 분석할 필요가 있다.
+
+분석한 데이터들은 현재 노인들의 여가활동의 주된 목적과 노인들의 여가시간과 여가활동 빈도는 어떻게 되는지, 또한 어떤 유형의 여가활동에 주로 참여하는지, 참여하는 여가활동에 만족을 하고 있는지를 조사를 할 수 있으며, 여기서 더 나아가, 유형별 여가활동 만족도를 분석할 수 있다. 여기에 더해서 여가활동에 따른 행복수준 데이터가 있었는데, 유형별 여가활동 만족도와 행복수준을 변수로 두어 모델링도 할 수 있을 것이다.
+ 
+
+## 1) 노인 여가활동이 삶의 필수적 요건인지의 응답여부
+
+##### 노년기가 길어지면서 노인이 변화하는 환경에 적응하면서 만족스럽고 행복한 노후를 보낼 수 있는 토대를 마련하는 일은 노인문제를 해결하는데 있어 매우 중요한 과제이다. 우선적으로 노인층 여가활동 실태파악을 위해 국민여가활동조사에 의한 여가 활동이 삶의 필수적 요건인지의 여부에 대한 응답 데이터 분석을 통해서 노인 여가 인식을 먼저 알아보고자 한다. 
+
+##### 기본 패키지 설치 및 코드와 실행결과는 아래와 같다.
+
+```{R}
+library(xlsx)
+library(dplyr)
+library( rJava )
+library(ggplot2)
+library(mice)
+library(tidyverse)
+
+lei.life18 <- read.xlsx2('C://Users//CPB06GameN//Desktop//dataset//여가활동이삶의필수적요건인지의여부2018.xlsx', sheetIndex=1, header=T)
+lei.life60 <- subset(lei.life18, X.=="…60대")
+lei.life70 <- subset(lei.life18, X.=="…70대이상")
+index<- c("그렇다", "그렇지않다", "다소그렇다","다소그렇지않다","매우그렇다", "보통이다", "전혀그렇지않다")
+numlife60 <- as.numeric( lei.life60[2:8] )
+numlife70 <- as.numeric( lei.life70[2:8] )
+
+lei.life6070 <- data.frame( 범주 = index, dosu = numlife60+numlife70  )
+lei.life6070
+
+#pie그래프로 표현 
+ggplot(lei.life6070, aes(x = "", y = dosu, fill = 범주)) + 
+    geom_bar(width = 1, stat = "identity", color = "white") +
+    coord_polar("y") +
+    theme_void() +
+    ggtitle("여가활동이 삶의 필수적 요건인지 응답여부")+
+    theme(plot.title = element_text(hjust=0.5, size=25, face="bold",  colour = "gray30"))
+
+```
+
+#####  우리나라라 연령 60-70대 노인층은 여가활동이 삶의 필수적 요건 인식에 대해 그렇다, 다소그렇다라고 응답이 높은 것을 확인할 수 있다. 따라서 노인층이 여가활동이 삶에 필수적이라고 인식하고 있다는 것을 확인할 수 있었다.
+
+
+## 2) 노인층 여가 주된 목적
+##### 노인층이 여가활동 삶에 필요 인식도가 높다는 것을 통해 그렇다면 노인층 여가활동은 어떠한 목적으로 참여하고자 하는지 파악해보고자 한다. 
+
+
+```{R}
+
+purpose <- read.csv('C://Users//CPB06GameN//Desktop//dataset//여가활동의주된목적2018.csv', header = TRUE,skip=1)[, -1:-2]
+
+#### csv파일을 불러올 때 header를 포함하지만 2018년도로 묶여 skip을 사용하여 첫번째 행을 제외해주고, 구분을 쉽게하기 위해 행 이름을 부여해주었다.
+
+
+purposemean1 <- mean( purpose$X2.개인의.즐거움을.위해 )
+purposemean2 <- mean( purpose$X3.마음의.안정과.휴식을.위해 )
+purposemean3 <- mean( purpose$X4.스트레스.해소를.위해)
+purposemean4 <- mean( purpose$X5.자기.만족을.위해)
+purposemean5 <- mean( purpose$X6.건강을.위해 )
+purposemean6 <- mean( purpose$X7.시간을.보내기.위해 )
+purposemean7 <- mean( purpose$X8.대인관계.교제를.위해 )
+purposemean8 <- mean( purpose$X9.가족과.시간을.함께하기.위해 )
+purposemean9 <- mean( purpose$X10.자기.계발을.위해 )
+purposemean10 <- mean( purpose$X11.종교적.신념 )
+purposemean11 <- mean( purpose$X12.기타 )
+purposemean1
+
+purpose6070 <- c( purposemean1, purposemean2, purposemean3, purposemean4, purposemean5, 
+               purposemean6, purposemean7,purposemean8,purposemean9, purposemean10,purposemean8)
+index2<- c("개인의 즐거움", "마음의 안정 휴식", "스트레스 해소 ","자기만족","건강을 위해", "시간을 보내기 위해", "대인관계교제", 
+           "가족과 시간을 보내기 위해", "자기계발을 위해 ", "종교적 신념" ,"기타")
+
+dfpurpose6070 <- data.frame( 목적 = index2, 평균 = purpose6070 )
+
+ggplot(dfpurpose6070, aes(x = 평균, y = reorder(목적, 평균) , fill = 목적)) + 
+    geom_bar(width = 1, stat = "identity", color = "white") +
+    geom_text(aes(label=평균))+
+    ggtitle("노인층 여가 주된 목적 ")+
+    theme(plot.title = element_text(hjust=0.5, size=20, face="bold",  colour = "gray30"))+
+    labs(x=" ",y="목적")+
+    theme(legend.position = "none") #범주가 너무 길어서 지우는 방법
+
+```
+
+
+
+우리나라 노인의 여가활동 목적을 살펴보면 개인 즐거움, 건강, 시간을 보내기 위해, 대인관계 등에 따라 다양한 양상을 보이고 있다.
+그 중 노인층은 **개인의 즐거움, 마음 안정휴식, 건강을 위해, 시간을 보내기 위한** 목적으로 주 여가활동을 참여하는 것을 알 수 있다. 
+
+
+# 2. 시간
+
+대한민국 노인 인구의의 지난 1년동안 평일 하루당 평균 여가시간을 알아보기 위하여 아래와 같은 방법으로 EDA를 진행하였다. 사용한 데이터는 노인의 지난 1년동안 평일 하루 평균 여가시간에 대한 18년도 통계자료이다. 평일을 선택한 것은 대부분 은퇴 생활자인 노인들의 특성을 고려하여 결정하였다. 결측치는 결과에 영향을 끼치지 않는다고 판단하여 삭제했다. 
+
+```{r}
+library(readxl)
+library(rJava)
+library(xlsx)
+library(ggplot2)
+library(tibble)
+library(dplyr)
+library(magrittr)
+library(readxl)
+
+
+### 데이터셋 불러오기
+leisure <- read.csv( 'C://Users//CPB06GameN//Desktop//dataset//노인지난1년동안평일하루평균여가시간2018_EDA용.csv',
+                     skip = 1,
+                     header = T )
+
+### 불필요열 제거
+leisure <- leisure[ , -1 ]
+
+
+### 결측치 처리
+sum( is.na( leisure ) ) # 없음
+
+
+### 행, 열 이름 지정
+rownames( leisure ) = c( '60대', '70대' )
+colnames( leisure ) = c( '연령대', '3시간 미만',
+                         '3~5시간 미만', '5~7시간 미만', '7~9시간 미만',
+                         '9시간 이상' )
+
+
+### 막대그래프, 파이차트
+
+# 1. 변수끼리 평균 구하기( 60대 + 70대 이상 )
+leisure_mean_1 <- mean( leisure$'3시간 미만' )
+leisure_mean_2 <- mean( leisure$'3~5시간 미만' )
+leisure_mean_3 <- mean( leisure$'5~7시간 미만' )
+leisure_mean_4 <- mean( leisure$'7~9시간 미만' )
+leisure_mean_5 <- mean( leisure$'9시간 이상' )
+
+# 2. 평균 변수 생성
+leisure_mean <- c( leisure_mean_1, leisure_mean_2, leisure_mean_3,
+                   leisure_mean_4, leisure_mean_5 )
+
+# 3. 막대그래프, 파이차트에 쓸 이름지정 팩터 생성
+name_for_leisure_mean <- c( '3시간 미만', '3~5시간 미만', '5~7시간 미만',
+                            '7~9시간 미만', '9시간 이상' )
+name_for_leisure_mean_factor <- as.factor( name_for_leisure_mean )
+
+# 4. 막대그래프 작성
+barplot( leisure_mean, 
+         ylim = c( 0,50 ), 
+         main = '2018년 지난 1년 평일 하루 여가시간 평균',
+         names = name_for_leisure_mean_factor,
+         xlab = "평일 하루당 여가시간",
+         ylab = "",
+         col = heat.colors(5) )
+
+### ggplot 막대그래프, 파이차트
+
+# 1. ggplot 막대그래프, 파이차트에 쓸 데이터프레임 생성
+leisure_final <- data.frame( group = name_for_leisure_mean_factor,
+                             value = leisure_mean )
+
+# 2. ggplot 이용한 막대그래프 작성
+leisure_bp <- ggplot( leisure_final, aes( x = "", y = value, fill = group ) ) +
+    geom_bar( width = 1, stat = "identity" )
+leisure_bp
+
+# 3. ggplot 이용한 파이차트 작성
+leisure_pie <- leisure_bp + coord_polar( "y", start = 0 )
+leisure_pie
+```
+
+
+
+# 3. 빈도
+
+## 주 여가 활동 빈도 순위
+
+노인들의 유형별 여가활동 만족도와  행복수준에 미치는 영향을 분석하기에 앞서서, 기본적으로 노인들이 여가활동을 얼마나 하는지에 대한 파악이 우선적으로 요구되었다. 여가활동 수행 주기별 순위를 비교함으로서 여가활동이 노인들의 삶에 얼마나 밀접해있고, 또 영향을 미치는지를 파악하고자 한다.
+
+해당 데이터는 18년도 세대별 여가활동 빈도에 관한 통계이다.
+
+```{r}
+library(devtools)
+library(tibble)
+library(xlsx)
+
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+time <- read.xlsx2("18년도 주 여가 활동 빈도 순위.xlsx",sheetIndex = 1,header = T)
+time
+
+str(time)
+
+t1 <- data.frame(time[7:8,])
+t1
+```
+
+필요한 데이터는 60, 70대이기에 해당 행만 추출하였다. 이후,
+
+```{r}
+t2 <- t(t1)
+t2
+
+t3 <- t2[3:7, 1:2]
+t3
+
+t4 <- t3[1,]
+t5 <- t3[2,]
+t6 <- t3[3,]
+t7 <- t3[4,]
+t8 <- t3[5,]
+
+t44 <- as.numeric(t4)
+t55 <- as.numeric(t5)
+t66 <- as.numeric(t6)
+t77 <- as.numeric(t7)
+t88 <- as.numeric(t8)
+
+t44<- mean(t44)
+t55 <- mean(t55)
+t66 <- mean(t66)
+t77 <- mean(t77,na.rm=T)
+t88 <- mean(t88,na.rm=T)
+```
+
+데이터 전처리 과정을 진행하였다. 그 다음 해당 값을 바탕으로 시각화 작업을 진행하였다. 그 결과는 다음과 같다.
+
+```{r}
+ta <- c("매일","일주일에 몇 번", "한 달에 2~3번", "한 달에 1번", "몇 달에 1번")
+ta1 <- as.factor(ta)
+str(ta1)
+ttl<- c(t44,t55,t66,t77,t88)
+
+barplot(ttl, ylim = c(0,100), names=ta, sub = "노인의 여가활동 빈도", col = c('Red','Blue','Yellow','White','Green'))
+
+```
+
+
+# 4. 여가활동 유형별 순위
+
+노인들의 여가활동과 생활 만족도 간의 관계를 알아보기에 앞서, 먼저 사전 분류 작업을 위해 노인들의 지난 1년간 여가활동 참여 순위를 빈도 순으로 정리하였다. 해당 자료는 18년 통계청에서 발간한 자료이며, 중복 응답이 허용되었다.
+
+```{r}
+library(readxl)
+library(rJava)
+library(xlsx)
+library(ggplot2)
+library(tibble)
+library(dplyr)
+library(magrittr)
+library(readxl)
+
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+old15<- read.csv(file = '지난_1년_동안_가장_많이_참여한_여가활동_유형_복수응답_15순위_20200601233920.csv')
+
+old1 <- data.frame(old15[10:11,])
+
+bo<- t(old1)
+
+bo1 <- bo[3:11,1:2]
+```
+
+먼저 법정 노인 연령 기준 및 학술적으로 정의하는 노인 연령들, 그리고 데이터 수집 범위를 고려하여 해당 데이터에서 60, 70대만 추출하여 데이터 프레임화였다. 이후 좀 더 엄밀한 세분화 작업을 진행하였다. 이후,
+
+```{r}
+bo11 <- as.numeric(bo1[,1])
+bo12 <- as.numeric(bo1[,2])
+
+bo3<- data.frame(bo11,bo12)
+bo3 <- bo3[-1,]
+
+k<- c("휴식활동","취미오락활동",	"사회및 기타활동",	"스포츠참여활동","문화예술관람활동","스포츠관람활동","관광활동","문화예술참여활동")
+k1<- as.factor(k)
+
+barplot(bo3$bo11, ylim = c(0,100), names=k1, sub="60대")
+barplot(bo3$bo12, ylim = c(0,100), names=k1, sub="70대")
+```
+
+문자로 인식되던 것을 숫자로 인식되도록 개별 행을 뜯어서  바꿔준 후 다시 데이터 프레임화를 하였다. 추가로 불필요하다고 생각된 표본 수를 제거해준 후, x축에 식별이 용이하도록 문자를 팩터로 전환하여 이름을 지정해주었다. 이후 최종적으로 막대그래프로 시각화하였다.
+
+# 5. 만족도 
+
+## 각 여가활동별 참여자 만족도 비교
+
+노인들이 주로 참가하는 여가활동의 큰 범주는 앞서 정리한 여가활동 순위 및 참고용 논문과 통계들로 정리되었는데, 그 종류는 "취미오락활동",  "휴식활동", "관광활동", "문화예술관람활동", "문화예술참여활동", "스포츠관람활동", "사회및기타활동", "스포츠참여활동"로 총 8개이다. 이 8개 항목별로 참여자들의 만족도 조사가 진행되었는데, 이를 바탕으로 가장 만족도가 높은 여가활동을 산출하고자 하였다. 이는 위에서 빈도 별로 정리된 여가활동별 참여 순위와 실제 만족도가 양의 관계가 있는지를 파악하고, 더 나아가 노인들에게 가장 만족을 주는 여가활동을 찾아 해결책으로 제안하기 위함이다.
+
+사용된 데이터는 국민여가생활 실태조사에서 사용된 18년도 통계자료이다. 발견된 결측치는 데이터를 살펴볼 때 결과에 크게 영향을 끼치지 않는다고 판단하여 삭제하였다. 
+
+## 휴식생활 만족도
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+mr <- read.csv('평일에_참여한_여가활동_만족도__휴식활동_관람_활동자_20200602182942(18년).csv')
+mrt <-data.frame( mr[4:5,3:9])
+
+nmrt <- t(mrt)
+
+mr1 <- as.numeric(nmrt[,1])
+mr2 <- as.numeric(nmrt[,2])
+```
+
+원하는 범위 추출 및 데이터 프레임화, 숫자로 인식하는 과정 등을 거쳤다. 해당 과정 이후에 진행된 추가 작업은 두 가지인데, 첫 번째는 막대 그래프화였다. 이는 조원들의 데이터에 대한 직관과 이해를 높이고, 유의미한 이상현상이 관찰되는지를 확인하기 위해 진행된 보조적인 작업이다. 시각화된 형태는 다음과 같다.
+
+```{r}
+mr3 <- data.frame(mr1,mr2)
+mr4 <- t(mr3)
+
+r <- c("매우 불만족", "불만족","약간 불만족","보통","약간 만족함","만족함",	"매우 만족함")
+r1 <- as.factor(r)
+
+barplot(mr1, names=r1, ylim=c(0,100), sub="휴식활동 18년 60대")
+barplot(mr2, names=r1, ylim=c(0,100), sub="휴식활동 18년 70대")
+```
+
+두 번째는 각 여가활동 비교를 위한 가중치 부여이다. 각 여가활동의 만족도를 비교하여 순위를 정하기 위해서는 공통된 비교가능한 수치의 산출이 필요하다. 때문에 조원들 간의 숙의를 거치던 중, 자가척도평가법에서 항목별로 가중치를 다르게 하여 점수를 배정하는 방법을 떠올리고는 그 방법을 응용하여 적용하였다. 
+
+%로 표시된 원데이터의 각 항목별 값을 1~7까지 오름차순으로 곱한 다음, 합하여 최종적인 수치를 냈다. 해당 과정에서는 60, 70대의 조정 점수를 구분하지 않고 합하여서 표기하였는데, 이는 앞서 막대 그래프를 바탕으로 한 시각화 자료를 볼 때 60, 70대에서 큰 차이가 보이지 않았기 때문이다. 
+
+세부 계산과정은 다음과 같다.
+
+```{r}
+mmm1<- mr1*c(1,2,3,4,5,6,7)
+mmm2<- mr2*c(1,2,3,4,5,6,7)
+
+tmrt1<- sum(mmm1,na.rm=TRUE)
+tmrt2<- sum(mmm2,na.rm=TRUE)
+
+total.mul.r<- sum(tmrt1,tmrt2)
+```
+
+결측치는 앞선 과정과 동일하게 제거하였다.
+
+다른 7개 여가활동도 동일한 방법으로 진행하였기에 이후 설명은 생략한다.
+
+## 취미활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+hu <- read.csv('평일에_참여한_여가활동_만족도__취미오락활동_관람_활동자_20200602190651(18년).csv')
+hut <-data.frame( hu[4:5,3:9])
+
+nhut <- t(hut)
+
+hr1 <- as.numeric(nhut[,1])
+hr2 <- as.numeric(nhut[,2])
+
+hr3 <- data.frame(hr1,hr2)
+hr4 <- t(hr3)
+h <- c("매우 불만족", "불만족","약간 불만족","보통","약간 만족함","만족함",	"매우 만족함")
+h1 <- as.factor(h)
+
+barplot(hr1, names=h1, ylim=c(0,100), sub="취미오락활동 18년 60대")
+barplot(hr2, names=h1, ylim=c(0,100), sub="취미오락활동 18년 70대")
+
+#
+hhh1<- hr1*c(1,2,3,4,5,6,7)
+hhh2<- hr2*c(1,2,3,4,5,6,7)
+
+thrt1<- sum(hhh1,na.rm=TRUE)
+thrt2<- sum(hhh2,na.rm=TRUE)
+
+total.mul.h<- sum(thrt1,thrt2)
+```
+
+## 관광활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+tu <- read.csv('평일에_참여한_여가활동_만족도__관광활동_관람_활동자_20200602192052(18년도).csv')
+tut <- data.frame( tu[4:5,3:9])
+
+ntut <- t(tut)
+
+tr1 <- as.numeric(ntut[,1])
+tr2 <- as.numeric(ntut[,2])
+
+tr3 <- data.frame(tr1,tr2)
+tr4 <- t(tr3)
+
+t <- c("매우 불만족", "불만족","약간 불만족","보통","약간 만족함","만족함",	"매우 만족함")
+t1 <- as.factor(t)
+
+barplot(tr1, names=t1, ylim=c(0,100), sub="관광활동 18년 60대")
+barplot(tr2, names=t1, ylim=c(0,100), sub="관광활동 18년 70대")
+
+#
+ttt1<- tr1*c(1,2,3,4,5,6,7)
+ttt2<- tr2*c(1,2,3,4,5,6,7)
+
+ttrt1<- sum(ttt1,na.rm=TRUE)
+ttrt2<- sum(ttt2,na.rm=TRUE)
+
+total.mul.t<- sum(ttrt1,ttrt2)
+```
+
+## 문화예술관람활동 만족도
+
+이후 스크립트는 다른 조원이 수행한 스크립트이다. 때문에 방식에 있어서 앞선 스크립트와 다소간에 차이가 있을 수는 있으나, 결과는 동일하다.
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+da <- read.xlsx2("18년도 예술관람활동 만족도.xlsx",sheetIndex = 1,header = T)
+da
+
+str(da)
+
+da1 <- data.frame(da[7:8,])
+da1
+
+da2 <- t(da1)
+da2
+
+da3 <- da2[3:9, 1]
+da3
+
+da4 <- da2[3:9, 2]
+da4
+
+da11 <- as.numeric(da3)
+da22 <- as.numeric(da4)
+
+da33 <- data.frame(da11,da22)
+da33
+
+a <- c("매우 불만족","불만족","다소 불만족","보통","다소 만족한다","만족함","매우 만족함")
+a1 <- as.factor(a)
+str(a1)
+
+barplot(da33$da11, ylim = c(0,100), names=a1, sub="문화예술관람활동 60대")
+barplot(da33$da22, ylim = c(0,100), names=a1, sub="문화예술관람활동 70대")
+
+#
+ddd1<- da11*c(1,2,3,4,5,6,7)
+ddd2<- da22*c(1,2,3,4,5,6,7)
+
+tddd1<- sum(ddd1,na.rm=TRUE)
+tddd2<- sum(ddd2,na.rm=TRUE)
+
+total.mul.d<- sum(tddd1,tddd2)
+```
+
+## 문화예술참여활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+db <- read.xlsx2("18년도 문화예술 참여활동 만족도.xlsx",sheetIndex = 1,header = T)
+db
+
+str(db)
+
+db1 <- data.frame(db[7:8,])
+db1
+
+db2 <- t(db1)
+db2
+
+db3 <- db2[3:9, 1]
+db3
+
+db4 <- db2[3:9, 2]
+db4
+
+db11 <- as.numeric(db3)
+db22 <- as.numeric(db4)
+
+db33 <- data.frame(db11,db22)
+db33
+
+b <- c("매우 불만족","불만족","다소 불만족","보통","다소 만족한다","만족함","매우 만족함")
+b1 <- as.factor(b)
+str(b1)
+
+
+barplot(db33$db11, ylim = c(0,100), names=b1, sub="문화예술참여활동 60대")
+barplot(db33$db22, ylim = c(0,100), names=b1, sub="문화예술참여활동 70대")
+
+#
+bbb1<- db11*c(1,2,3,4,5,6,7)
+bbb2<- db22*c(1,2,3,4,5,6,7)
+
+tbbb1<- sum(bbb1,na.rm=TRUE)
+tbbb2<- sum(bbb2,na.rm=TRUE)
+
+total.mul.db<- sum(tbbb1,tbbb2)
+```
+
+## 스포츠관람활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+dc <- read.xlsx2("18년도 스포츠 관람활동 만족도.xlsx",sheetIndex = 1,header = T)
+dc
+
+str(dc)
+
+dc1 <- data.frame(dc[7:8,])
+dc1
+
+dc2 <- t(dc1)
+dc2
+
+dc3 <- dc2[3:9, 1]
+dc3
+
+dc4 <- dc2[3:9, 2]
+dc4
+
+dc11 <- as.numeric(dc3)
+dc22 <- as.numeric(dc4)
+
+dc33 <- data.frame(dc11,dc22)
+dc33
+
+
+barplot(dc33$dc11, ylim = c(0,100), names=b1, sub="스포츠관람활동 60대")
+barplot(dc33$dc22, ylim = c(0,100), names=b1, sub="스포츠관람활동 70대")
+#앞에서 사용한 b1 팩터 재활용.
+
+#
+ccc1<- dc11*c(1,2,3,4,5,6,7)
+ccc2<- dc22*c(1,2,3,4,5,6,7)
+
+tccc1<- sum(ccc1,na.rm=TRUE)
+tccc2<- sum(ccc2,na.rm=TRUE)
+
+total.mul.dc<- sum(tccc1,tccc2)
+```
+
+## 스포츠참여활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+dx <- read.xlsx2("18년도 스포츠 참여활동 만족도.xlsx",sheetIndex = 1,header = T)
+dx
+
+str(dx)
+
+dx1 <- data.frame(dx[7:8,])
+dx1
+
+dx2 <- t(dx1)
+dx2
+
+dx3 <- dx2[3:9, 1]
+dx3
+
+dx4 <- dx2[3:9, 2]
+dx4
+
+dx11 <- as.numeric(dx3)
+dx22 <- as.numeric(dx4)
+
+dx33 <- data.frame(dx11,dx22)
+dx33
+
+z <- c("매우 불만족","불만족","다소 불만족","보통","다소 만족한다","만족함","매우 만족함")
+z1 <- as.factor(z)
+str(z1)
+
+barplot(dx33$dx11, ylim = c(0,100), names=z1, sub="스포츠참여활동 60대")
+barplot(dx33$dx22, ylim = c(0,100), names=z1, sub="스포츠참여활동 70대")
+
+#
+xxx1<- dx11*c(1,2,3,4,5,6,7)
+xxx2<- dx22*c(1,2,3,4,5,6,7)
+
+txxx1<- sum(xxx1,na.rm=TRUE)
+txxx2<- sum(xxx2,na.rm=TRUE)
+
+total.mul.dx<- sum(txxx1,txxx2)
+```
+
+## 사회및기타활동 만족도
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//dataset")
+de <- read.xlsx2("18년도 사회 및 기타활동 만족도.xlsx",sheetIndex = 1,header = T)
+de
+
+str(de)
+
+de1 <- data.frame(de[7:8,])
+de1
+
+de2 <- t(de1)
+de2
+
+de3 <- de2[3:9, 1]
+de3
+
+de4 <- de2[3:9, 2]
+de4
+
+de11 <- as.numeric(de3)
+de22 <- as.numeric(de4)
+
+de33 <- data.frame(de11,de22)
+de33
+
+e <- c("매우 불만족","불만족","다소 불만족","보통","다소 만족한다","만족함","매우 만족함")
+e1 <- as.factor(e)
+str(e1)
+
+barplot(de33$de11, ylim = c(0,100), names=e1, sub="사회및기타참여활동 60대")
+barplot(de33$de22, ylim = c(0,100), names=e1, sub="사회및기타참여활동 70대")
+
+#
+eee1<- de11*c(1,2,3,4,5,6,7)
+eee2<- de22*c(1,2,3,4,5,6,7)
+
+teee1<- sum(eee1,na.rm=TRUE)
+teee2<- sum(eee2,na.rm=TRUE)
+
+total.mul.de<- sum(teee1,teee2)
+```
+
+## 보정 점수치를 통한 만족도 순위 비교
+
+위에서 언급한 이유와 과정을 통해서 산출한 각 여가활동 보정값들을 비교하는 작업을 진행하였다. 과정은 다음과 같다.
+```{r}
+sof1<- c(total.mul.h, total.mul.r, total.mul.t, total.mul.d, total.mul.db, total.mul.dc, total.mul.de, total.mul.dx)
+sof2 <- data.frame(sof1)
+str(sof2)
+class(sof2)
+sof3 <- t(sof2)
+
+sf <- c("취미오락활동", "휴식활동","관광활동","문화예술관람활동","문화예술참여활동","스포츠관람활동","사회및기타활동","스포츠참여활동")
+
+sff <- as.factor(sf)
+```
+
+시각화는 산점도로 표현하였으며, 그 결과는 아래와 같다.
+
+```{r}
+dsof3<- data.frame(sof3)
+vvv <- t(dsof3)
+vvv <- data.frame(vvv)
+str(vvv)
+
+
+plot(vvv$sof1, col=1:8,pch=16, axes=FALSE, ann=FALSE, cex=2) 
+     axis(1,at=1:8,lab=sff )
+     axis(2, ylim=c(1080,1180))
+     
+```
+
+그 결과 관광활동(1151.5)과 사회및기타활동(1150.4)의 만족도가 제일 높은 것으로 나타났다.
+
+
+# 6. 긍정적인 영향
+
+```{R}
+### 데이터셋 불러오기
+
+positive <- read.csv( 'C://Users/CPB06GameN//Desktop//dataset//2018_여가활동의긍정적인영향여부.csv',
+                      skip = 1,
+                      header = T )
+
+
+### 불필요열 제거
+positive <- positive[ , -1 ]
+
+
+### 결측치 처리
+sum( is.na( positive ) )            # 1 개 발견
+positive[ is.na( positive ) ]<- 0   # 0으로 변경
+
+
+### 행, 열 이름 지정
+rownames( positive ) = c( '60대', '70대' )
+colnames( positive ) = c( '연령대', '표본수', '전혀그렇지않다',
+                          '그렇지않다', '다소그렇지않다', '보통이다',
+                          '다소그렇다', '그렇다', '매우그렇다', '평균' )
+
+
+### 막대그래프, 파이차트
+
+# 1. 변수끼리 평균 구하기( 60대 + 70대 이상 )
+positive_mean_1 <- mean( positive$전혀그렇지않다)
+positive_mean_2 <- mean( positive$그렇지않다)
+positive_mean_3 <- mean( positive$다소그렇지않다)
+positive_mean_4 <- mean( positive$보통이다)
+positive_mean_5 <- mean( positive$다소그렇다)
+positive_mean_6 <- mean( positive$그렇다)
+positive_mean_7 <- mean( positive$매우그렇다)
+
+# 2. 평균 변수 생성
+positive_mean <- c( positive_mean_1, positive_mean_2, positive_mean_3,
+                               positive_mean_4, positive_mean_5, positive_mean_6, positive_mean_7 )
+
+# 3. 막대그래프, 파이차트에 쓸 이름지정 팩터 생성
+name_for_positive_mean <- c( '전혀그렇지않다', '그렇지않다', '다소그렇지않다',
+                             '보통이다', '다소그렇다', '그렇다', '매우그렇다' )
+name_for_positive_mean_factor <- as.factor( name_for_positive_mean )
+
+# 4. 막대그래프 작성
+barplot( positive_mean, 
+         ylim = c( 0,50 ), 
+         main = '2018년 대한민국 60대 이상의 여가활동의 긍정적 여부 평균', 
+         names = name_for_positive_mean_factor,
+         xlab = "항목별 응답",
+         ylab = "",
+         col = heat.colors(7) )
+
+# 5. 파이차트 작성
+pie( positive_mean,
+     main = '2018년 대한민국 60대 이상의 여가활동의 긍정적 여부 평균' )
+```
+
+
+
+```{r}
+### ggplot 막대그래프, 파이차트
+
+# 1. ggplot 막대그래프, 파이차트에 쓸 데이터프레임 생성
+positive_final <- data.frame( group = name_for_positive_mean_factor,
+    value = positive_mean )
+
+# 2. ggplot 이용한 막대그래프 작성
+positive_bp <- ggplot( positive_final, aes( x = "", y = value, fill = group ) ) +
+    geom_bar( width = 1, stat = "identity" )
+positive_bp
+
+# 3. ggplot 이용한 파이차트 작성
+positive_pie <- positive_bp + coord_polar( "y", start = 0 )
+positive_pie
+
+```
+
+
+
+
+# 7. 행복수준
+
+# : ( 2018년 대한민국 60세 이상의 행복수준 평균 )
+```{R}
+
+### 데이터셋 불러오기
+
+happiness <- read.csv( 'C://Users//CPB06GameN//Desktop//dataset//2018_행복수준.csv',
+                       skip = 1,
+                       header = T )
+
+
+### 불필요열 제거
+happiness <- happiness[ , -1 ]
+happiness
+
+
+### 결측치 처리
+sum( is.na( happiness ) )   # 없음
+
+
+### 행, 열 이름 지정
+rownames( happiness ) = c( '60대', '70대' )
+colnames( happiness ) = c( '연령대', '표본수', '1-2점',
+                           '3-4점', '5-6점', '7점이상', '평균' )
+
+```
+
+```{r}
+### 막대그래프, 파이차트
+
+# 1. 변수끼리 평균 구하기( 60대 + 70대 이상 )
+happiness_mean_1 <- mean( happiness$`1-2점` )
+happiness_mean_2 <- mean( happiness$`3-4점` )
+happiness_mean_3 <- mean( happiness$`5-6점` )
+happiness_mean_4 <- mean( happiness$`7점이상` )
+
+# 2. 평균 변수 생성
+happiness_mean <- c( happiness_mean_1, happiness_mean_2,
+                     happiness_mean_3, happiness_mean_4 )
+
+# 3. 막대그래프, 파이차트에 쓸 이름지정 팩터 생성
+name_for_happiness_mean <- c( '1-2점','3-4점', '5-6점', '7점이상' )
+name_for_happiness_mean_factor <- as.factor( name_for_happiness_mean )
+
+
+# 4. 막대그래프 작성
+barplot( happiness_mean, 
+         ylim = c( 0,75 ), 
+         main = '2018년 대한민국 60세 이상의 행복수준 평균', 
+         names = name_for_happiness_mean_factor,
+         xlab = "점수",
+         ylab = "",
+         col = heat.colors(4) )
+
+
+# 5. 파이차트 작성
+pie( happiness_mean,
+     main = '2018년 대한민국 60세 이상의 행복수준 평균' )
+
+```

@@ -1,0 +1,119 @@
+---
+title: "지역별 이용객 수"
+author: "NKH"
+date: '2020 5 29 '
+output: word_document
+---
+
+```{r}
+setwd("C://Users//CPB06GameN//Desktop//과제=인원")
+library(readxl)
+library(rJava)
+library(xlsx)
+library(ggplot2)
+library(tibble)
+library(dplyr)
+library(magrittr)
+
+
+pop19 <- read.xlsx2(file = '총이용인원-요일별2019.xlsx', sheetIndex=1, startRow=6, header=T)
+pop19
+str(pop19)
+
+pop19 <- pop19[2:9,]
+str(pop19)
+```
+
+이렇게 해서 불러내었으나, ','로 인하여 문자열로 인식되는 문제가 발생하였다. 하여,
+
+```{r}
+mon <- as.numeric(gsub(',', '', pop19[,2]))
+tue <- as.numeric(gsub(',', '', pop19[,3]))
+wed <- as.numeric(gsub(',', '', pop19[,4]))
+thu <- as.numeric(gsub(',', '', pop19[,5]))
+fri <- as.numeric(gsub(',', '', pop19[,6]))
+sat <- as.numeric(gsub(',', '', pop19[,7]))
+sun <- as.numeric(gsub(',', '', pop19[,8]))
+```
+
+요일별로 각각 추출하였다. 이렇게 한 것은 for문 사용법이 미숙하여 선택한 방법이기도 하며, 추가적인 상의를 통해 주중과 주말로 통합하여 비교하기로 결정하였기에 이후 적용을 쉽게하기 위하여 선택한 방법이다. 해당 방법으로 ','를 제거하고 숫자열로 바꾼 값들은 이후,
+
+```{r}
+week <- data.frame(mon,tue,wed,thu,fri)
+
+weeked <- data.frame(sat,sun)
+```
+
+데이터 프레임 과정을 거쳤다. 
+
+```{r}
+suw1<- sum(week[1,])
+bsw1<- sum(week[2,])
+dgw1<- sum(week[3,])
+icw1<- sum(week[4,])
+gjw1<- sum(week[5,])
+djw1<- sum(week[6,])
+usw1<- sum(week[7,])
+ssw1<- sum(week[8,])
+
+
+suw2<- sum(weeked[1,])
+bsw2<- sum(weeked[2,])
+dgw2<- sum(weeked[3,])
+icw2<- sum(weeked[4,])
+gjw2<- sum(weeked[5,])
+djw2<- sum(weeked[6,])
+usw2<- sum(weeked[7,])
+ssw2<- sum(weeked[8,])
+
+
+low<- data.frame(suw1, bsw1, dgw1, icw1, gjw1,djw1,usw1,ssw1)
+loed <- data.frame(suw2, bsw2, dgw2, icw2, gjw2,djw2,usw2,ssw2)
+```
+
+이후 주중 및 주말 이용객 수의 지역별 총합을 sum을 통하여 정리한 다음, 데이터프레임화를 실시하였다. 그러나 해당 데이터 프레임을 이용한 시각화 시도는 몇 가지 기술적 난관과  시간적인 문제에 봉착, 원하는 형태로 출력하는데 어려움을 겪었다. 때문에 부득이 하게 각 데이터 프레임 값을 r에서 수기로 벡터화한 다음 새로 데이터 프레임으로 만들었다.
+
+```{r}
+지역 <- c(1,2,3,4,5,6,7,8)
+주중 <- c(22094347, 5306090, 2501721, 3930314, 1093383, 1283493, 708128, 141489)
+주말 <- c( 6461961, 1638432, 764370, 1130607, 295026, 370261, 195758, 35911)
+
+last1 <- data.frame(지역,주중)
+last2 <- data.frame(지역,주말)
+```
+
+이 데이터 프레임을 바탕으로 한 시각화 자료는 다음과 같다. 
+ 
+ 
+```{r}
+#지역별 주중 이용객 수 총합
+ggplot(last1, aes(x=지역, y=주중,fill=as.factor(지역)))+
+    geom_bar(stat = 'identity')+
+    scale_y_continuous(labels = scales::comma)+
+    geom_text(aes(label=주중),
+              size=5,
+              position="stack")
+
+
+#지역별 주말 이용객 수 총합
+ggplot(last2, aes(x=지역, y=주말,fill=as.factor(지역)))+
+    geom_bar(stat = 'identity')+
+    scale_y_continuous(labels = scales::comma)+
+    geom_text(aes(label=주말),
+          size=5,
+          position="stack")
+
+#지역별 주중-주말 이용객 수 차이
+차이<- (last1$주중)-(last2$주말)
+지역
+
+last3 <- data.frame(지역, 차이)
+
+ggplot(last3, aes(x=지역, y=차이,fill=as.factor(지역)))+
+    geom_bar(stat = 'identity')+
+    scale_y_continuous(labels = scales::comma)+
+    geom_text(aes(label=차이),
+              size=5,
+              position="stack")
+```
+
